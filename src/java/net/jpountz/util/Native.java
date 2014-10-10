@@ -24,13 +24,11 @@ public enum Native {
   ;
 
   private enum OS {
-    // Even on Windows, the default compiler from cpptasks (gcc) uses .so as a shared lib extension
-    WINDOWS("win32", "so"), LINUX("linux", "so"), MAC("darwin", "dylib"), SOLARIS("solaris", "so");
-    public final String name, libExtension;
+    WINDOWS("/win32/%s/%s.dll"), LINUX("/linux/%s/lib%s.so"), MAC("/darwin/%s/lib%s.dylib"), SOLARIS("/solaris/%s/lib%s.so");
+    public final String pattern;
 
-    private OS(String name, String libExtension) {
-      this.name = name;
-      this.libExtension = libExtension;
+    private OS(String pattern) {
+      this.pattern = pattern;
     }
   }
 
@@ -56,7 +54,7 @@ public enum Native {
 
   private static String resourceName() {
     OS os = os();
-    return "/" + os.name + "/" + arch() + "/liblz4-java." + os.libExtension;
+    return String.format(os.pattern, arch(), "lz4-java");
   }
 
   private static boolean loaded = false;
@@ -76,7 +74,7 @@ public enum Native {
     }
     File tempLib;
     try {
-      tempLib = File.createTempFile("liblz4-java", "." + os().libExtension);
+      tempLib = File.createTempFile("liblz4-java", ".so");
       // copy to tempLib
       FileOutputStream out = new FileOutputStream(tempLib);
       try {
